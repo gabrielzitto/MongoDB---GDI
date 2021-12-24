@@ -1,0 +1,149 @@
+//musicas
+//usuarios e seus dados
+//playlist recomendadas
+//planos de assinatura
+//
+/*
+  checklist:
+
+  Inserção, atualização e remoção de dados.
+  Seleção de dados utilizando o maior número de recursos possíveis:
+  Seleção e Projeção de atributos
+  Filtros e Funções de agregação
+
+1. USE (OK)
+2. FIND (OK)
+3. SIZE (OK)
+4. AGGREGATE (OK)
+5. MATCH (OK)
+6. PROJECT (OK)
+7. GTE (OK)
+8. GROUP (OK)
+9. SUM (OK)
+10. COUNT (OK)
+11. MAX (OK)
+12. AVG (OK)
+13. EXISTS (OK)
+14. SORT (OK)
+15. LIMIT (OK)
+16. $WHERE (OK)
+17. MAPREDUCE
+18. FUNCTION (OK)
+19. PRETTY (OK)
+20. ALL (OK)
+21. SET (OK)
+22. TEXT (OK)
+23. SEARCH (OK)
+24. FILTER (OK)
+25. UPDATE (OK)
+26. SAVE (OK) - Não é mais usado nas versões recente do mongoDB
+27. RENAMECOLLECTION(OK)
+28. COND(OK)
+29. LOOKUP (OK)
+30. FINDONE(OK)
+31. ADDTOSET(OK)
+*/
+//db.musicas.drop()
+
+use db;
+
+var map = function () {
+    emit(this.funk.funkPesado, this.rock.rockPesado);
+};
+var reduce = function (funkPesado, rockPesado) {
+    total = funkPesado+rockPesado
+    return total;
+};
+
+db.musicaCategoria.mapReduce(map, reduce, { out: "Results" });
+//====================================================
+db.musicaCategoria.aggregate([
+   {
+      $project: {
+         rock: {
+            $filter: {
+               input: "$rock",
+               as: "rockFilter",
+               cond: { $gte: [ "$$rockFilter.rockAntigo", 9 ] }
+            }
+         }
+      }
+   }
+]).pretty();
+
+
+//use db;
+
+
+//Retorna as musicas que foram reproduzidas menos de 5000 vezes
+  db.musicas.find({
+    $where: function () {
+      return this.reproduzida < 5000;
+    },
+  });
+  
+//===================================
+db.musicas.findOne({ artista: "Mc Marcinho" },{time:0});
+
+//muda o nome da playlist
+db.playlistRecomendadas.update( { _id:1 }, { $set: { nomePlaylist: "Musicas que marcaram epoca" } } );
+//==========================================================
+db.usuarios.find({"_id": { $gt: 5}}).pretty()
+//========================================================
+db.usuarios.aggregate( [
+   {
+     $lookup:
+       {
+         //relacionará o nome das musicas a playlist do usuario
+         from: "musicas",
+         localField: "playlist_personal",
+         foreignField: "nome_musica",
+         as: "music_relacional"
+       }
+  }
+] )
+//===================================
+db.playlistRecomendadas.update({nomePlaylist:"Pra tocar no paredão"});
+
+
+//===================================
+db.usuarios.find({
+    $text: {
+      $search: "Premium",
+    },
+  }).pretty();
+
+//===================================
+  db.usuarios.save({
+    nome: "Jorgin",
+    email: "jorgin@gmail.com",
+    plano: "Basic",
+    tipo_plano: "anual",
+    playlist_personal: [
+      "Glamurosa",
+      "Believer"
+    ]
+  });
+//===================================
+// ordenada pela quantidade de vezes que foram reproduzidas
+  db.musicas.find().sort({reproduzida:-1});
+//retorna uma playlist onde so tem duas musicas limitadas a 1
+  db.playlistRecomendadas.find({ musicas: { $size: 2 } }).limit(1);
+
+  db.musicas.aggregate([
+   { $project: {music:"$nome_musica", avgReproducoes: { $avg: "$reproduzida"} } },
+   { $group:{ _id: 1,time: { $count: {} }, totalDeReproducoes: {$sum: "$reproduzida"} } },
+   { $match: { artista: "Sia"} }
+]).pretty()
+
+//retorna o usuario de ID caso ele exista
+db.usuarios.find({ _id: { $exists: true, $all:[1]} }).pretty();
+
+
+db.playlistRecomendadas.updateOne( { _id:1 },  { $addToSet: { nomePlaylist: "Mais tocadas do momento"  } } )
+
+db.playlistRecomendadas.find();
+
+db.playlistRecomendadas.renameCollection("melhoresPlaylists");
+
+

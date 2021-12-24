@@ -1,0 +1,83 @@
+
+db.musicas.insertMany([
+    {
+        "_id" : 1,
+        nome_musica: "Glamurosa",
+        artista:"Mc Marcinho",
+        time:"3:58",
+        //quantas vezes essa musica foi reproduzida
+        reproduzida:2500
+        
+    },
+
+    {
+        "_id" : 2,
+        nome_musica: "Believer",
+        artista:"Imagine Dragons",
+        time:"3:37",
+        reproduzida:7220
+        
+    },
+
+    {
+        "_id" : 3,
+        nome_musica: "Unstoppable",
+        artista:"Sia",
+        time:"3:41",
+        reproduzida:11239
+        
+    }
+])
+
+db.usuarios.insertMany([
+    {
+        "_id" : 1,
+        nome: "Carlin",
+        email:"carlin7@gmail.com",
+        plano:"Premium",
+        tipo_plano:"mensal",
+        playlist_personal:["Glamurosa","Unstoppable"]
+        
+    }
+])
+
+db.playlistRecomendadas.insertMany([
+  {
+        "_id" : 1,
+        nomePlaylist:"As mais tocadas",
+        musicas:["Unstoppable","Believer"]
+    },{
+        "_id" : 2,
+        nomePlaylist:"Escutou, viciou",
+        musicas:["Glamurosa","Believer"]
+    }
+]);
+
+
+db.musicaCategoria.insertMany([
+    {
+        "_id" : 1,
+        rock: [
+          { rockPesado: 22, rockLeve: 12, rockAntigo: 10 }
+        ]
+        
+    },{
+        "_id" : 2,
+        funk: [
+          { funkPesado: 23, funkOnstentacao: 19, funkAntigo: 9 }
+        ]
+        
+    },{
+        "_id" : 2,
+        Eletronica: [
+          { EletronicaDance: 33, EletroFunk: 19, Eletrobrega: 22 }
+        ]
+        
+    },
+
+   
+]);
+
+//find
+db.playlistRecomendadas.find({nomePlaylist:"Escutou, viciou"})
+db.playlistRecomendadas.update({nomePlaylist:"Escutou, viciou"})
